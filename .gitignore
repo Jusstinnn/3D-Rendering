@@ -8,8 +8,8 @@ external/
 # Android
 .gradle/
 .idea/
-app/build/
-app/.cxx/
+**/app/build/
+**/app/.cxx/
 local.properties
 
 # OS cruft
