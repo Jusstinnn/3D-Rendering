@@ -29,12 +29,13 @@ public:
     bool initializeRenderer();
     void resize(int w, int h);
     void render();
+    void shutdown();
 
     // Forwarded from MainActivity.java (via queueEvent + JNI) on Android,
     // and from the GLFW mouse callbacks in main.cpp on Desktop/Web.
-    void touchDown(float x, float y);
-    void touchMove(float x, float y);
-    void touchRelease(float x, float y);
+    void touchEventDown(float x, float y);
+    void touchEventMove(float x, float y);
+    void touchEventRelease(float x, float y);
 
 private:
     Renderer()  = default;

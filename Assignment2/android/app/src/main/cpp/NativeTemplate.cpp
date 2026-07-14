@@ -1,72 +1,56 @@
 /**
  * NativeTemplate.cpp
  *
- * Thin JNI bridge between the Java/Android layer and Renderer.
- * All Model/shape logic lives in Scene/Renderer.* + Fan.
- *
- * Native method signatures match MainActivity.java:
- *   package com.example.fan3d
- *   class   MainActivity
- *
- * Symbol-name rule: JNI resolves each Java "native" method to a C symbol
- * named Java_<package_with_underscores>_<Class>_<method>. If the Java
- * package or class name ever changes, every symbol below must be renamed
- * to match exactly, or the app will crash at runtime with
- * UnsatisfiedLinkError even though the code compiles fine.
+ * JNI bridge for the Android activity. All calls run on the GLSurfaceView GL
+ * thread; scene logic remains in the shared Renderer and Fan classes.
  */
 
-#define LOG_TAG "Fan3DNative"
+#define LOG_TAG "Fan3D"
 
 #include <jni.h>
 #include <android/asset_manager_jni.h>
-#include "Platform.h"   // GLES3/gl3.h + LOGI/LOGE — Model.h/Renderer.h deliberately don't pull this in
-#include "Renderer.h"
 
-// ---------------------------------------------------------------------------
-// JNI entry points
-// ---------------------------------------------------------------------------
+#include "Renderer.h"
 
 extern "C" JNIEXPORT jboolean JNICALL
 Java_com_example_fan3d_MainActivity_nativeInit(
-        JNIEnv* env, jobject /*thiz*/, jobject assetManager)
+        JNIEnv* env, jobject, jobject javaAssetManager)
 {
-    LOGI("nativeInit called");
-    AAssetManager* mgr = AAssetManager_fromJava(env, assetManager);
-    Renderer::Instance().setAssetManager(mgr);
+    AAssetManager* manager = AAssetManager_fromJava(env, javaAssetManager);
+    Renderer::Instance().setAssetManager(manager);
     return Renderer::Instance().initializeRenderer() ? JNI_TRUE : JNI_FALSE;
 }
 
 extern "C" JNIEXPORT void JNICALL
 Java_com_example_fan3d_MainActivity_nativeResize(
-        JNIEnv* /*env*/, jobject /*thiz*/, jint width, jint height)
+        JNIEnv*, jobject, jint width, jint height)
 {
-    Renderer::Instance().resize(width, height);
+    Renderer::Instance().resize(static_cast<int>(width), static_cast<int>(height));
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_example_fan3d_MainActivity_nativeRender(
-        JNIEnv* /*env*/, jobject /*thiz*/)
+Java_com_example_fan3d_MainActivity_nativeRender(JNIEnv*, jobject)
 {
     Renderer::Instance().render();
 }
 
 extern "C" JNIEXPORT void JNICALL
 Java_com_example_fan3d_MainActivity_nativeTouchDown(
-        JNIEnv* /*env*/, jobject /*thiz*/, jfloat x, jfloat y)
+        JNIEnv*, jobject, jfloat x, jfloat y)
 {
-    Renderer::Instance().touchDown(x, y);
+    Renderer::Instance().touchEventDown(x, y);
 }
 
 extern "C" JNIEXPORT void JNICALL
 Java_com_example_fan3d_MainActivity_nativeTouchMove(
-        JNIEnv* /*env*/, jobject /*thiz*/, jfloat x, jfloat y)
+        JNIEnv*, jobject, jfloat x, jfloat y)
 {
-    Renderer::Instance().touchMove(x, y);
+    Renderer::Instance().touchEventMove(x, y);
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_example_fan3d_MainActivity_nativeTouchUp(
-        JNIEnv* /*env*/, jobject /*thiz*/, jfloat x, jfloat y)
+Java_com_example_fan3d_MainActivity_nativeTouchRelease(
+        JNIEnv*, jobject, jfloat x, jfloat y)
 {
-    Renderer::Instance().touchRelease(x, y);
+    Renderer::Instance().touchEventRelease(x, y);
 }

@@ -72,21 +72,26 @@ void Renderer::render()
     }
 }
 
-void Renderer::touchDown(float x, float y)
+void Renderer::shutdown()
+{
+    clearModels();
+}
+
+void Renderer::touchEventDown(float x, float y)
 {
     for (Model* m : models) {
         m->TouchEventDown(x, y);
     }
 }
 
-void Renderer::touchMove(float x, float y)
+void Renderer::touchEventMove(float x, float y)
 {
     for (Model* m : models) {
         m->TouchEventMove(x, y);
     }
 }
 
-void Renderer::touchRelease(float x, float y)
+void Renderer::touchEventRelease(float x, float y)
 {
     for (Model* m : models) {
         m->TouchEventRelease(x, y);
