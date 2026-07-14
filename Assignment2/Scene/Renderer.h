@@ -34,4 +34,19 @@ public:
     // and from the GLFW mouse callbacks in main.cpp on Desktop/Web.
     void touchDown(float x, float y);
     void touchMove(float x, float y);
-    void touchRelease(float x, float y)
+    void touchRelease(float x, float y);
+
+private:
+    Renderer()  = default;
+    ~Renderer();
+
+    void createModels();
+    void initializeModels();
+    void clearModels();
+
+#ifdef PLATFORM_ANDROID
+    AAssetManager* assetMgr = nullptr;
+#endif
+
+    std::vector<Model*> models;
+};

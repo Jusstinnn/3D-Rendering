@@ -38,4 +38,35 @@ Java_com_example_fan3d_MainActivity_nativeInit(
 
 extern "C" JNIEXPORT void JNICALL
 Java_com_example_fan3d_MainActivity_nativeResize(
-        JNIEnv* /*env*/
+        JNIEnv* /*env*/, jobject /*thiz*/, jint width, jint height)
+{
+    Renderer::Instance().resize(width, height);
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_example_fan3d_MainActivity_nativeRender(
+        JNIEnv* /*env*/, jobject /*thiz*/)
+{
+    Renderer::Instance().render();
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_example_fan3d_MainActivity_nativeTouchDown(
+        JNIEnv* /*env*/, jobject /*thiz*/, jfloat x, jfloat y)
+{
+    Renderer::Instance().touchDown(x, y);
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_example_fan3d_MainActivity_nativeTouchMove(
+        JNIEnv* /*env*/, jobject /*thiz*/, jfloat x, jfloat y)
+{
+    Renderer::Instance().touchMove(x, y);
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_example_fan3d_MainActivity_nativeTouchUp(
+        JNIEnv* /*env*/, jobject /*thiz*/, jfloat x, jfloat y)
+{
+    Renderer::Instance().touchRelease(x, y);
+}

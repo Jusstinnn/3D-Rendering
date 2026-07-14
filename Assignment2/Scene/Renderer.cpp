@@ -79,4 +79,16 @@ void Renderer::touchDown(float x, float y)
     }
 }
 
-void Ren
+void Renderer::touchMove(float x, float y)
+{
+    for (Model* m : models) {
+        m->TouchEventMove(x, y);
+    }
+}
+
+void Renderer::touchRelease(float x, float y)
+{
+    for (Model* m : models) {
+        m->TouchEventRelease(x, y);
+    }
+}
