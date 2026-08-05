@@ -111,7 +111,11 @@ constexpr float kBaseColor[3]  = {0.78f, 0.78f, 0.82f}; // light gray/silver
 constexpr float kPoleColor[3]  = {0.65f, 0.65f, 0.70f};
 constexpr float kHubColor[3]   = {0.95f, 0.82f, 0.15f}; // gold
 constexpr float kBladeColor[3] = {1.00f, 0.55f, 0.15f}; // orange
-constexpr float kAmber[3]      = {1.0f, 0.75f, 0.0f};
+// Magenta rather than amber: every other part in this scene is a warm
+// gray/gold/orange tone, so amber-on-orange read as barely-distinguishable
+// in a screenshot even though picking was working correctly. Magenta can't
+// be confused with anything else here.
+constexpr float kAmber[3]      = {1.0f, 0.05f, 0.85f};
 
 } // namespace
 

@@ -95,38 +95,58 @@ bool SceneHUD::hitTest(const Rect& r, float x, float y) const
     return x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h;
 }
 
+void SceneHUD::applyButtonAction(int button)
+{
+    switch (button) {
+        case 0: speed = std::min(20.0f, speed + 2.0f); LOGI("+SPD pressed (speed=%.1f)", speed); break;
+        case 1: speed = std::max(0.0f, speed - 2.0f);  LOGI("-SPD pressed (speed=%.1f)", speed); break;
+        case 2: zoom  = std::max(3.0f, zoom - 1.0f);   LOGI("+ZOOM pressed (zoom=%.1f)", zoom); break;
+        case 3: zoom  = std::min(20.0f, zoom + 1.0f);  LOGI("-ZOOM pressed (zoom=%.1f)", zoom); break;
+        default: break;
+    }
+}
+
 bool SceneHUD::TouchDown(float x, float y)
 {
-    if (hitTest(btnSpeedUp_, x, y)) {
-        speed = std::min(20.0f, speed + 2.0f);
-        activeButton = 0;
-        LOGI("+SPD pressed (speed=%.1f)", speed);
-        return true;
-    }
-    if (hitTest(btnSpeedDown_, x, y)) {
-        speed = std::max(0.0f, speed - 2.0f);
-        activeButton = 1;
-        LOGI("-SPD pressed (speed=%.1f)", speed);
-        return true;
-    }
-    if (hitTest(btnZoomIn_, x, y)) {
-        zoom = std::max(3.0f, zoom - 1.0f);
-        activeButton = 2;
-        LOGI("+ZOOM pressed (zoom=%.1f)", zoom);
-        return true;
-    }
-    if (hitTest(btnZoomOut_, x, y)) {
-        zoom = std::min(20.0f, zoom + 1.0f);
-        activeButton = 3;
-        LOGI("-ZOOM pressed (zoom=%.1f)", zoom);
-        return true;
-    }
-    return false;
+    int hit = -1;
+    if      (hitTest(btnSpeedUp_,   x, y)) hit = 0;
+    else if (hitTest(btnSpeedDown_, x, y)) hit = 1;
+    else if (hitTest(btnZoomIn_,    x, y)) hit = 2;
+    else if (hitTest(btnZoomOut_,   x, y)) hit = 3;
+
+    if (hit == -1) return false;
+
+    // Bonus: press-and-hold. Apply once immediately so a quick tap still
+    // feels instant, then start the hold timer -- updateHold() takes over
+    // repeating this same action for as long as the press continues.
+    applyButtonAction(hit);
+    activeButton = hit;
+    holdFrameCounter = 0;
+    return true;
 }
 
 void SceneHUD::TouchRelease()
 {
     activeButton = -1;
+    holdFrameCounter = 0;
+}
+
+void SceneHUD::updateHold()
+{
+    if (activeButton == -1) return;
+
+    ++holdFrameCounter;
+    if (holdFrameCounter < kHoldInitialDelayFrames) return;
+
+    // Repeat only every kHoldRepeatIntervalFrames, not literally every
+    // frame: at 60fps a true every-frame repeat would slam +/-SPD from 0
+    // to 20 in a third of a second -- unusable, and not what "hold to
+    // repeat" is meant to feel like. This mirrors how OS keyboards repeat
+    // a held key: one initial delay, then a steady, controllable rate.
+    int framesSinceDelay = holdFrameCounter - kHoldInitialDelayFrames;
+    if (framesSinceDelay % kHoldRepeatIntervalFrames == 0) {
+        applyButtonAction(activeButton);
+    }
 }
 
 void SceneHUD::drawQuad(const Rect& rect, const float color[3])
@@ -138,6 +158,8 @@ void SceneHUD::drawQuad(const Rect& rect, const float color[3])
 
 void SceneHUD::Render()
 {
+    updateHold(); // bonus: press-and-hold repeat (see SceneHUD.h)
+
     glUseProgram(program_);
     glUniformMatrix4fv(locProjection_, 1, GL_FALSE, glm::value_ptr(hudProjection_));
     glBindVertexArray(vao_);
